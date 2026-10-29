@@ -26,7 +26,7 @@ export default function App() {
             <div className="flex items-center gap-3">
               <span className="font-bold text-white font-display">Prisma Studio</span>
               <span aria-hidden="true">·</span>
-              <span>Conversión local de imágenes (máx. 5 archivos por lote)</span>
+              <span>Conversión local de imágenes (máx. 10 archivos por lote)</span>
             </div>
 
             <div className="flex items-center gap-6">

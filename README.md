@@ -1,6 +1,6 @@
 # Prisma Studio — Conversor de Imágenes Multiformato
 
-**Prisma Studio** es una aplicación web con estética **Cyberpunk (Negro Obsidiana y Morado Neón)** diseñada para convertir, optimizar, redimensionar e inspeccionar lotes de hasta **5 imágenes simultáneas** directamente en el navegador del usuario (100% *client-side*), sin necesidad de subir archivos a servidores externos.
+**Prisma Studio** es una aplicación web con estética **Cyberpunk (Negro Obsidiana y Morado Neón)** diseñada para convertir, optimizar, redimensionar e inspeccionar lotes de hasta **10 imágenes simultáneas** directamente en el navegador del usuario (100% *client-side*), sin necesidad de subir archivos a servidores externos.
 
 ---
 
@@ -9,7 +9,7 @@
 Prisma Studio resuelve la necesidad de transformar activos gráficos entre formatos web modernos, formatos de edición/imprenta sin pérdida y formatos de iconografía/vectoriales desde una interfaz unificada. La aplicación está dividida en dos vistas principales gestionadas mediante **React Router DOM**:
 
 - **Página Principal (`/`)**: Landing page informativa e interactiva donde se presenta la arquitectura de procesamiento óptico, métricas reales de reducción de peso, y el catálogo técnico de los 10 formatos soportados con acceso rápido al estudio conversor.
-- **Estudio de Conversión (`/convertir`)**: Espacio de trabajo dedicado a la carga por lotes (máximo 5 imágenes simultáneas), configuración de parámetros ópticos, conversión individual o masiva, comparación visual antes/después y exportación individual o en paquete `.zip`.
+- **Estudio de Conversión (`/convertir`)**: Espacio de trabajo dedicado a la carga por lotes (máximo 10 imágenes simultáneas), configuración de parámetros ópticos, conversión individual o masiva, comparación visual antes/después y exportación individual o en paquete `.zip`.
 
 ---
 
@@ -41,7 +41,7 @@ Prisma Studio soporta **10 formatos de imagen** organizados en tres categorías 
 
 ### Paso 2: Selección de Formato (Global o Individual)
 - **Selector Global**: En la barra superior del estudio conversor se puede elegir cualquiera de los 10 formatos (`WEBP`, `PNG`, `JPG`, `JPEG`, `AVIF`, `BMP`, `TIFF`, `GIF`, `ICO`, `SVG`) para aplicarlo automáticamente a todas las imágenes cargadas. Also acepta preselección por URL (ej. `/convertir?formato=png`).
-- **Selector Individual por Fila**: Cada una de las 5 imágenes en la cola cuenta con su propio menú desplegable para asignarle un formato de salida diferente dentro del mismo lote.
+- **Selector Individual por Fila**: Cada una de las 10 imágenes en la cola cuenta con su propio menú desplegable para asignarle un formato de salida diferente dentro del mismo lote.
 
 ### Paso 3: Ajuste de Parámetros Ópticos y Geométricos
 Al desplegar el panel **«Parámetros ópticos»**, el usuario puede personalizar la transformación antes de codificar:
@@ -80,7 +80,7 @@ Una vez convertida cualquier imagen, el botón **«Comparar»** abre el modal de
     │   └── ImageCompareModal.tsx    # Inspector comparativo con cortina deslizante
     ├── pages/
     │   ├── LandingPage.tsx          # Página principal (Ruta "/")
-    │   └── ConverterPage.tsx        # Estudio de conversión de hasta 5 imágenes (Ruta "/convertir")
+    │   └── ConverterPage.tsx        # Estudio de conversión de hasta 10 imágenes (Ruta "/convertir")
     └── utils/
         └── imageConverter.ts        # Motores de codificación binaria y filtros ópticos
 ```
