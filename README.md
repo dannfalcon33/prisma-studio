@@ -1,6 +1,16 @@
 # Prisma Studio — Conversor de Imágenes Multiformato
 
+[![Ver en Vivo — Prisma Studio](https://img.shields.io/badge/Ver%20en%20Vivo-Prisma%20Studio-9333EA?style=for-the-badge&logo=vercel&logoColor=white)](https://prismastudio-converter.falconit.xyz/)
+
+👉 **Demo en vivo:** [https://prismastudio-converter.falconit.xyz/](https://prismastudio-converter.falconit.xyz/)
+
 **Prisma Studio** es una aplicación web con estética **Cyberpunk (Negro Obsidiana y Morado Neón)** diseñada para convertir, optimizar, redimensionar e inspeccionar lotes de hasta **10 imágenes simultáneas** directamente en el navegador del usuario (100% *client-side*), sin necesidad de subir archivos a servidores externos.
+
+---
+
+## Vista Previa de la Aplicación
+
+![Vista previa de Prisma Studio — Conversor de Imágenes Multiformato](./public/assets/aistudio/Prisma_Studio___Conversor_de_Im_genes_Multiformato_eb92694b.png)
 
 ---
 
@@ -34,13 +44,13 @@ Prisma Studio soporta **10 formatos de imagen** organizados en tres categorías 
 
 ## 3. Funcionamiento Detallado del Flujo de Conversión
 
-### Paso 1: Carga y Validación del Lote (Máximo 5 Imágenes)
+### Paso 1: Carga y Validación del Lote (Máximo 10 Imágenes)
 1. El usuario puede arrastrar y soltar archivos en la zona de carga (*Drag & Drop*), seleccionarlos desde el explorador de archivos o pulsar el botón **«Cargar 3 imágenes de prueba»** (que genera dinámicamente 3 imágenes de alta resolución en memoria para pruebas inmediatas).
-2. El sistema verifica el límite estricto de **5 ranuras por lote** (`0 / 5` a `5 / 5`). Si el usuario selecciona más archivos de los permitidos, la cola admite hasta completar las 5 ranuras y muestra un aviso informativo.
+2. El sistema verifica el límite estricto de **10 ranuras por lote** (`0 / 10` a `10 / 10`). Si el usuario selecciona más archivos de los permitidos, la cola admite hasta completar las 10 ranuras y muestra un aviso informativo.
 3. Cada imagen se decodifica localmente para extraer sus dimensiones originales en píxeles (`ancho × alto px`), formato de origen y tamaño exacto en bytes.
 
 ### Paso 2: Selección de Formato (Global o Individual)
-- **Selector Global**: En la barra superior del estudio conversor se puede elegir cualquiera de los 10 formatos (`WEBP`, `PNG`, `JPG`, `JPEG`, `AVIF`, `BMP`, `TIFF`, `GIF`, `ICO`, `SVG`) para aplicarlo automáticamente a todas las imágenes cargadas. Also acepta preselección por URL (ej. `/convertir?formato=png`).
+- **Selector Global**: En la barra superior del estudio conversor se puede elegir cualquiera de los 10 formatos (`WEBP`, `PNG`, `JPG`, `JPEG`, `AVIF`, `BMP`, `TIFF`, `GIF`, `ICO`, `SVG`) para aplicarlo automáticamente a todas las imágenes cargadas. También acepta preselección por URL (ej. `/convertir?formato=png`).
 - **Selector Individual por Fila**: Cada una de las 10 imágenes en la cola cuenta con su propio menú desplegable para asignarle un formato de salida diferente dentro del mismo lote.
 
 ### Paso 3: Ajuste de Parámetros Ópticos y Geométricos
@@ -67,7 +77,8 @@ Una vez convertida cualquier imagen, el botón **«Comparar»** abre el modal de
 ```text
 /
 ├── public/
-│   └── favicon.svg                  # Favicon vectorial con prisma óptico neón
+│   ├── favicon.svg                  # Favicon vectorial con prisma óptico neón
+│   └── assets/aistudio/             # Captura de vista previa de la aplicación
 ├── index.html                       # Metadatos SEO, OpenGraph, Twitter Cards y JSON-LD
 ├── metadata.json                    # Configuración y descripción de la aplicación
 ├── README.md                        # Documentación técnica y funcional detallada
