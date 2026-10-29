@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-display: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: #050508;
+    color: #F8FAFC;
+    letter-spacing: 0.01em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, .font-display {
+    font-family: var(--font-display);
+  }
+
+  .font-mono-tabular {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Dark cyberpunk transparency checkerboard for image preview */
+.bg-checkerboard {
+  background-color: #0B0A14;
+  background-image: 
+    linear-gradient(45deg, #18142C 25%, transparent 25%), 
+    linear-gradient(-45deg, #18142C 25%, transparent 25%), 
+    linear-gradient(45deg, transparent 75%, #18142C 75%), 
+    linear-gradient(-45deg, transparent 75%, #18142C 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+}
+
+/* Subtle cyberpunk grid backdrop */
+.bg-cyber-grid {
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, rgba(168, 85, 247, 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(168, 85, 247, 0.07) 1px, transparent 1px);
+}
+
+/* Neon purple glow utilities */
+.neon-border-purple {
+  border-color: rgba(168, 85, 247, 0.45);
+  box-shadow: 0 0 24px -6px rgba(168, 85, 247, 0.35), inset 0 0 12px -8px rgba(192, 132, 252, 0.25);
+}
+
+.neon-button-purple {
+  background: linear-gradient(135deg, #9333EA 0%, #7E22CE 100%);
+  box-shadow: 0 0 20px -2px rgba(168, 85, 247, 0.55), inset 0 1px 0 0 rgba(233, 213, 255, 0.35);
+}
+
+.neon-button-purple:hover {
+  background: linear-gradient(135deg, #A855F7 0%, #9333EA 100%);
+  box-shadow: 0 0 28px 0px rgba(192, 132, 252, 0.7), inset 0 1px 0 0 rgba(250, 245, 255, 0.45);
+}

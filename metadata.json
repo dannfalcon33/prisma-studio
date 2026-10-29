@@ -1,0 +1,6 @@
+{
+  "name": "Prisma Studio — Conversor de Imágenes",
+  "description": "Convierte hasta 5 imágenes simultáneamente entre PNG, JPG, JPEG, WEBP, AVIF, BMP, TIFF, GIF, ICO y SVG en tu navegador con Prisma Studio.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
