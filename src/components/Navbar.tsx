@@ -1,10 +1,13 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Globe } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
+import { Language } from '../i18n/translations';
 
 export const Navbar: React.FC = () => {
   const location = useLocation();
   const isConverterPage = location.pathname === '/convertir';
+  const { language, setLanguage, t } = useLanguage();
 
   return (
     <header className="sticky top-0 z-30 bg-[#050508]/90 backdrop-blur-md border-b border-purple-500/25">
@@ -25,43 +28,63 @@ export const Navbar: React.FC = () => {
               !isConverterPage ? 'text-purple-300 underline' : ''
             }`}
           >
-            Inicio
+            {t.nav.home}
           </Link>
           <a
             href="/#capacidades"
             className="hover:text-purple-300 hover:underline underline-offset-4 transition-colors whitespace-nowrap shrink-0"
           >
-            Capacidades
+            {t.nav.capabilities}
           </a>
           <a
             href="/#impacto"
             className="hover:text-purple-300 hover:underline underline-offset-4 transition-colors whitespace-nowrap shrink-0"
           >
-            Rendimiento
+            {t.nav.performance}
           </a>
           <a
             href="/#formatos"
             className="hover:text-purple-300 hover:underline underline-offset-4 transition-colors whitespace-nowrap shrink-0"
           >
-            Formatos
+            {t.nav.formats}
           </a>
         </nav>
 
-        {/* Zone 3: 1 primary action */}
+        {/* Zone 3: Language Switcher + Primary Action */}
         <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-[#120E21] border border-purple-500/35 rounded-lg">
+            <Globe className="w-3.5 h-3.5 text-purple-300 shrink-0" />
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value as Language)}
+              aria-label={t.nav.langLabel}
+              className="bg-transparent text-xs font-semibold text-purple-100 focus:outline-none cursor-pointer font-mono-tabular"
+            >
+              <option value="es" className="bg-[#0B0914] text-white">
+                ES · Español
+              </option>
+              <option value="en" className="bg-[#0B0914] text-white">
+                EN · English
+              </option>
+              <option value="pt" className="bg-[#0B0914] text-white">
+                PT · Português
+              </option>
+            </select>
+          </div>
+
           {isConverterPage ? (
             <Link
               to="/"
               className="px-4 py-2 text-xs font-semibold text-purple-200 border border-purple-500/40 rounded-lg hover:bg-purple-500/15 transition-colors whitespace-nowrap shrink-0"
             >
-              Volver a Inicio
+              {t.nav.backHome}
             </Link>
           ) : (
             <Link
               to="/convertir"
               className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white rounded-lg neon-button-purple transition-all whitespace-nowrap shrink-0"
             >
-              <span>Abrir Conversor</span>
+              <span>{t.nav.openConverter}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           )}

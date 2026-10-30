@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Download, ArrowLeftRight, Columns2 } from 'lucide-react';
 import { ConvertedResult, formatBytes, getFormatSpec } from '../utils/imageConverter';
+import { useLanguage } from '../context/LanguageContext';
 
 export interface CompareModalItem {
   id: string;
@@ -24,6 +25,7 @@ export const ImageCompareModal: React.FC<ImageCompareModalProps> = ({
   onClose,
   onDownload
 }) => {
+  const { t } = useLanguage();
   const [sliderPos, setSliderPos] = useState<number>(50);
   const [viewMode, setViewMode] = useState<'split' | 'side-by-side'>('split');
 
@@ -62,19 +64,19 @@ export const ImageCompareModal: React.FC<ImageCompareModalProps> = ({
                       id="compare-modal-title"
                       className="text-base font-bold text-white truncate font-display"
                     >
-                      Inspección óptica: {item.file.name}
+                      {t.modal.title(item.file.name)}
                     </h3>
                     <div className="flex items-center gap-2 text-xs text-purple-200/70 mt-0.5 font-mono-tabular">
                       <span>
-                        Original: {item.sourceFormat} ({item.originalWidth} ×{' '}
+                        {t.modal.originalLabel}: {item.sourceFormat} ({item.originalWidth} ×{' '}
                         {item.originalHeight} px · {formatBytes(item.file.size)})
                       </span>
                       <span aria-hidden="true" className="text-purple-400">
                         →
                       </span>
                       <span className="text-purple-200 font-medium">
-                        Salida: {targetSpec.label} ({result.width} × {result.height} px ·{' '}
-                        {formatBytes(result.sizeBytes)})
+                        {t.modal.outputLabel}: {targetSpec.label} ({result.width} × {result.height}{' '}
+                        px · {formatBytes(result.sizeBytes)})
                       </span>
                       <span aria-hidden="true">·</span>
                       <span
@@ -84,7 +86,8 @@ export const ImageCompareModal: React.FC<ImageCompareModalProps> = ({
                             : 'text-amber-400 font-medium'
                         }
                       >
-                        {percentDelta > 0 ? `+${percentDelta}%` : `${percentDelta}%`} en peso
+                        {percentDelta > 0 ? `+${percentDelta}%` : `${percentDelta}%`}{' '}
+                        {t.modal.weightDelta}
                       </span>
                     </div>
                   </div>
@@ -102,7 +105,7 @@ export const ImageCompareModal: React.FC<ImageCompareModalProps> = ({
                         }`}
                       >
                         <ArrowLeftRight className="w-3.5 h-3.5" />
-                        Cortina interactiva
+                        {t.modal.splitModeBtn}
                       </button>
                       <button
                         type="button"
@@ -114,7 +117,7 @@ export const ImageCompareModal: React.FC<ImageCompareModalProps> = ({
                         }`}
                       >
                         <Columns2 className="w-3.5 h-3.5" />
-                        Lado a lado
+                        {t.modal.sideBySideBtn}
                       </button>
                     </div>
 
@@ -122,7 +125,7 @@ export const ImageCompareModal: React.FC<ImageCompareModalProps> = ({
                       type="button"
                       onClick={onClose}
                       className="p-2 text-purple-300/70 hover:text-white hover:bg-purple-500/20 rounded-lg transition-colors cursor-pointer"
-                      aria-label="Cerrar inspector"
+                      aria-label={t.modal.closeAria}
                     >
                       <X className="w-5 h-5" />
                     </button>
@@ -137,7 +140,7 @@ export const ImageCompareModal: React.FC<ImageCompareModalProps> = ({
                         {/* Converted Image (Base full layer) */}
                         <img
                           src={result.url}
-                          alt={`Resultado convertido ${result.fileName}`}
+                          alt={result.fileName}
                           referrerPolicy="no-referrer"
                           className="w-full h-full object-contain"
                         />
@@ -149,7 +152,7 @@ export const ImageCompareModal: React.FC<ImageCompareModalProps> = ({
                         >
                           <img
                             src={item.previewUrl}
-                            alt={`Original ${item.file.name}`}
+                            alt={item.file.name}
                             referrerPolicy="no-referrer"
                             className="w-full h-full object-contain"
                           />
@@ -167,16 +170,18 @@ export const ImageCompareModal: React.FC<ImageCompareModalProps> = ({
 
                         {/* Corner Labels */}
                         <div className="absolute bottom-3 left-3 bg-[#090812]/90 border border-purple-500/30 text-purple-100 px-2.5 py-1 rounded text-xs font-mono-tabular">
-                          Original ({item.sourceFormat} · {formatBytes(item.file.size)})
+                          {t.modal.originalCorner} ({item.sourceFormat} ·{' '}
+                          {formatBytes(item.file.size)})
                         </div>
                         <div className="absolute bottom-3 right-3 bg-[#090812]/90 border border-purple-500/40 text-purple-200 px-2.5 py-1 rounded text-xs font-mono-tabular">
-                          Convertido ({targetSpec.label} · {formatBytes(result.sizeBytes)})
+                          {t.modal.convertedCorner} ({targetSpec.label} ·{' '}
+                          {formatBytes(result.sizeBytes)})
                         </div>
                       </div>
 
                       <div className="flex items-center gap-4 max-w-md mx-auto">
                         <span className="text-xs text-purple-300/70 font-mono-tabular whitespace-nowrap">
-                          Original
+                          {t.modal.originalCorner}
                         </span>
                         <input
                           type="range"
@@ -184,7 +189,7 @@ export const ImageCompareModal: React.FC<ImageCompareModalProps> = ({
                           max={100}
                           value={sliderPos}
                           onChange={(e) => setSliderPos(Number(e.target.value))}
-                          aria-label="Posición de cortina comparativa"
+                          aria-label={t.modal.sliderAria}
                           className="w-full accent-purple-500 cursor-pointer"
                         />
                         <span className="text-xs text-purple-300 font-mono-tabular whitespace-nowrap">
@@ -196,7 +201,9 @@ export const ImageCompareModal: React.FC<ImageCompareModalProps> = ({
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <div className="flex items-center justify-between text-xs text-purple-200/70 font-mono-tabular">
-                          <span className="font-semibold text-white">Archivo original</span>
+                          <span className="font-semibold text-white">
+                            {t.modal.originalFileHeader}
+                          </span>
                           <span>
                             {item.sourceFormat} · {item.originalWidth} × {item.originalHeight} px ·{' '}
                             {formatBytes(item.file.size)}
@@ -205,7 +212,7 @@ export const ImageCompareModal: React.FC<ImageCompareModalProps> = ({
                         <div className="h-[380px] rounded-lg border border-purple-500/30 bg-checkerboard flex items-center justify-center p-3 overflow-hidden">
                           <img
                             src={item.previewUrl}
-                            alt={`Original ${item.file.name}`}
+                            alt={item.file.name}
                             referrerPolicy="no-referrer"
                             className="max-w-full max-h-full object-contain"
                           />
@@ -215,7 +222,7 @@ export const ImageCompareModal: React.FC<ImageCompareModalProps> = ({
                       <div className="space-y-2">
                         <div className="flex items-center justify-between text-xs text-purple-200/70 font-mono-tabular">
                           <span className="font-semibold text-purple-300">
-                            Resultado {targetSpec.label}
+                            {t.modal.resultHeader(targetSpec.label)}
                           </span>
                           <span>
                             {targetSpec.label} · {result.width} × {result.height} px ·{' '}
@@ -225,7 +232,7 @@ export const ImageCompareModal: React.FC<ImageCompareModalProps> = ({
                         <div className="h-[380px] rounded-lg border border-purple-500/30 bg-checkerboard flex items-center justify-center p-3 overflow-hidden">
                           <img
                             src={result.url}
-                            alt={`Convertido ${result.fileName}`}
+                            alt={result.fileName}
                             referrerPolicy="no-referrer"
                             className="max-w-full max-h-full object-contain"
                           />
@@ -238,7 +245,7 @@ export const ImageCompareModal: React.FC<ImageCompareModalProps> = ({
                 {/* Modal Footer */}
                 <div className="flex items-center justify-between gap-4 px-6 py-4 border-t border-purple-500/25 bg-[#0E0B1A]">
                   <div className="text-xs text-purple-200/70 font-mono-tabular">
-                    Tiempo de codificación: {result.durationMs} ms · MIME: {result.mimeType}
+                    {t.modal.encodingTime}: {result.durationMs} ms · MIME: {result.mimeType}
                   </div>
                   <div className="flex items-center gap-3">
                     <button
@@ -246,7 +253,7 @@ export const ImageCompareModal: React.FC<ImageCompareModalProps> = ({
                       onClick={onClose}
                       className="px-4 py-2 text-xs font-medium text-purple-200 hover:text-white border border-purple-500/30 rounded-lg hover:bg-purple-500/15 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
                     >
-                      Cerrar vista
+                      {t.modal.closeBtn}
                     </button>
                     <motion.button
                       whileHover={{ scale: 1.03 }}
@@ -256,7 +263,7 @@ export const ImageCompareModal: React.FC<ImageCompareModalProps> = ({
                       className="flex items-center gap-2 px-4 py-2 text-xs font-semibold text-white rounded-lg neon-button-purple transition-all whitespace-nowrap shrink-0 cursor-pointer"
                     >
                       <Download className="w-3.5 h-3.5" />
-                      Descargar {result.fileName}
+                      {t.modal.downloadFileBtn(result.fileName)}
                     </motion.button>
                   </div>
                 </div>

@@ -32,6 +32,7 @@ import {
   ColorFilterMode
 } from '../utils/imageConverter';
 import { ImageCompareModal, CompareModalItem } from '../components/ImageCompareModal';
+import { useLanguage } from '../context/LanguageContext';
 
 const MAX_IMAGES = 10;
 const smoothEase: [number, number, number, number] = [0.16, 1, 0.3, 1];
@@ -50,6 +51,7 @@ interface QueuedImageItem {
 }
 
 export const ConverterPage: React.FC = () => {
+  const { t } = useLanguage();
   const [searchParams] = useSearchParams();
   const initialFormatParam = searchParams.get('formato') as ImageFormatId | null;
   const validInitialFormat = SUPPORTED_FORMATS.some((f) => f.id === initialFormatParam)
@@ -109,9 +111,7 @@ export const ConverterPage: React.FC = () => {
       );
 
       if (validImageFiles.length === 0) {
-        setLimitNotice(
-          'Selecciona archivos de imagen válidos (PNG, JPG, JPEG, WEBP, AVIF, BMP, GIF, ICO, TIFF o SVG).'
-        );
+        setLimitNotice(t.converter.invalidFileNotice);
         return;
       }
 
@@ -119,17 +119,13 @@ export const ConverterPage: React.FC = () => {
       const availableSlots = MAX_IMAGES - currentCount;
 
       if (availableSlots <= 0) {
-        setLimitNotice(
-          `El límite máximo es de ${MAX_IMAGES} imágenes simultáneas. Elimina alguna imagen de la cola para añadir nuevas.`
-        );
+        setLimitNotice(t.converter.maxLimitReachedNotice(MAX_IMAGES));
         return;
       }
 
       const filesToProcess = validImageFiles.slice(0, availableSlots);
       if (validImageFiles.length > availableSlots) {
-        setLimitNotice(
-          `Se han cargado ${filesToProcess.length} imágenes hasta completar el límite máximo de ${MAX_IMAGES} archivos por lote.`
-        );
+        setLimitNotice(t.converter.partialLoadNotice(filesToProcess.length, MAX_IMAGES));
       }
 
       const newItems: QueuedImageItem[] = [];
@@ -155,9 +151,7 @@ export const ConverterPage: React.FC = () => {
             status: 'idle'
           });
         } catch {
-          setLimitNotice(
-            `No se pudo leer la imagen "${file.name}". Verifica que el archivo no esté dañado.`
-          );
+          setLimitNotice(t.converter.corruptFileNotice(file.name));
         }
       }
 
@@ -165,14 +159,12 @@ export const ConverterPage: React.FC = () => {
         setQueue((prev) => [...prev, ...newItems].slice(0, MAX_IMAGES));
       }
     },
-    [queue.length, globalFormat]
+    [queue.length, globalFormat, t.converter]
   );
 
   const handleLoadStudioSamples = async () => {
     if (queue.length >= MAX_IMAGES) {
-      setLimitNotice(
-        `Ya tienes ${MAX_IMAGES} imágenes cargadas. Vacía la cola o elimina un archivo para cargar las muestras.`
-      );
+      setLimitNotice(t.converter.alreadyFullSamplesNotice(MAX_IMAGES));
       return;
     }
     setIsLoadingSamples(true);
@@ -278,7 +270,7 @@ export const ConverterPage: React.FC = () => {
         })
       );
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Error durante la conversión';
+      const msg = err instanceof Error ? err.message : t.converter.errorStatus;
       setQueue((prev) =>
         prev.map((item) =>
           item.id === id ? { ...item, status: 'error', errorMessage: msg } : item
@@ -334,7 +326,7 @@ export const ConverterPage: React.FC = () => {
     const zipUrl = URL.createObjectURL(zipBlob);
     const a = document.createElement('a');
     a.href = zipUrl;
-    a.download = `prisma_studio_lote_${completed.length}_imagenes.zip`;
+    a.download = `prisma_studio_batch_${completed.length}.zip`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -369,15 +361,12 @@ export const ConverterPage: React.FC = () => {
               className="inline-flex items-center gap-1.5 text-xs font-medium text-purple-300/80 hover:text-purple-200 mb-3 transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Volver a la página principal</span>
+              <span>{t.converter.backToHome}</span>
             </Link>
             <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white font-display">
-              Estudio de Conversión Multiformato
+              {t.converter.pageTitle}
             </h1>
-            <p className="text-sm text-purple-200/70 mt-1">
-              Carga hasta 10 imágenes simultáneamente y conviértelas entre PNG, JPG, JPEG, WEBP,
-              AVIF, BMP, TIFF, GIF, ICO y SVG.
-            </p>
+            <p className="text-sm text-purple-200/70 mt-1">{t.converter.pageSubtitle}</p>
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
@@ -390,7 +379,7 @@ export const ConverterPage: React.FC = () => {
               className="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-white rounded-lg neon-button-purple disabled:opacity-40 transition-all whitespace-nowrap shrink-0 cursor-pointer"
             >
               <Upload className="w-3.5 h-3.5" />
-              <span>Añadir imágenes ({queue.length}/{MAX_IMAGES})</span>
+              <span>{t.converter.addImagesBtn(queue.length, MAX_IMAGES)}</span>
             </motion.button>
           </div>
         </motion.div>
@@ -406,7 +395,7 @@ export const ConverterPage: React.FC = () => {
           <div className="px-6 py-4 border-b border-purple-500/25 bg-[#0E0B1A] flex flex-wrap items-center justify-between gap-4">
             {/* 10-Slot Capacity Indicator */}
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-1.5" aria-label="Capacidad de lote de 10 imágenes">
+              <div className="flex items-center gap-1.5">
                 {Array.from({ length: MAX_IMAGES }).map((_, idx) => {
                   const isFilled = idx < queue.length;
                   return (
@@ -431,11 +420,13 @@ export const ConverterPage: React.FC = () => {
                 <span className="font-semibold text-white">
                   {queue.length} / {MAX_IMAGES}
                 </span>{' '}
-                ranuras ocupadas
+                {t.converter.slotsOccupied}
                 {queue.length > 0 && (
                   <>
                     <span aria-hidden="true"> · </span>
-                    <span>Entrada: {formatBytes(totalOriginalBytes)}</span>
+                    <span>
+                      {t.converter.inputTotal}: {formatBytes(totalOriginalBytes)}
+                    </span>
                   </>
                 )}
               </div>
@@ -452,7 +443,7 @@ export const ConverterPage: React.FC = () => {
                 className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-purple-100 bg-[#151026] border border-purple-500/35 rounded-lg hover:bg-purple-500/20 disabled:opacity-40 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
               >
                 <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-                {isLoadingSamples ? 'Generando muestras...' : 'Cargar 3 imágenes de prueba'}
+                {isLoadingSamples ? t.converter.loadingSamples : t.converter.loadSamplesBtn}
               </motion.button>
 
               <motion.button
@@ -467,7 +458,7 @@ export const ConverterPage: React.FC = () => {
                 }`}
               >
                 <Sliders className="w-3.5 h-3.5" />
-                Parámetros ópticos ({quality}% · {scalePercent}%)
+                {t.converter.opticalParamsBtn(quality, scalePercent)}
               </motion.button>
             </div>
           </div>
@@ -475,15 +466,14 @@ export const ConverterPage: React.FC = () => {
           {/* Global Format Bar */}
           <div className="px-6 py-4 border-b border-purple-500/25 flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-[#0B0914]">
             <div className="flex items-center gap-2 text-xs text-purple-200/75 shrink-0">
-              <span className="font-semibold text-white">Formato de salida global:</span>
-              <span>Aplicar a todo el lote o personalizar por archivo</span>
+              <span className="font-semibold text-white">{t.converter.globalFormatLabel}</span>
+              <span>{t.converter.globalFormatSub}</span>
             </div>
 
             {/* Segmented Interactive Format Buttons */}
             <div
               className="flex items-center gap-1 p-1 bg-[#140F26] border border-purple-500/30 rounded-lg overflow-x-auto"
               role="group"
-              aria-label="Selector de formato de salida global"
             >
               {SUPPORTED_FORMATS.map((fmt) => {
                 const active = globalFormat === fmt.id;
@@ -519,7 +509,7 @@ export const ConverterPage: React.FC = () => {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-xs">
                     <label htmlFor="quality-range" className="font-semibold text-white">
-                      Calidad de codificación
+                      {t.converter.qualityLabel}
                     </label>
                     <span className="font-mono-tabular text-purple-300 font-semibold">
                       {quality}%
@@ -535,15 +525,13 @@ export const ConverterPage: React.FC = () => {
                     onChange={(e) => setQuality(Number(e.target.value))}
                     className="w-full accent-purple-500 cursor-pointer"
                   />
-                  <p className="text-xs text-purple-200/60">
-                    Activo en WEBP, JPG, JPEG, AVIF y SVG. PNG, BMP y TIFF son sin pérdida.
-                  </p>
+                  <p className="text-xs text-purple-200/60">{t.converter.qualityHelp}</p>
                 </div>
 
                 {/* 2. Resolution Scaling */}
                 <div className="space-y-2">
                   <label className="block text-xs font-semibold text-white">
-                    Escala de resolución
+                    {t.converter.scaleLabel}
                   </label>
                   <div className="flex items-center gap-1 p-1 bg-[#17122B] border border-purple-500/25 rounded-lg">
                     {[25, 50, 75, 100, 150, 200].map((pct) => (
@@ -561,15 +549,13 @@ export const ConverterPage: React.FC = () => {
                       </button>
                     ))}
                   </div>
-                  <p className="text-xs text-purple-200/60">
-                    Redimensiona proporcionalmente el ancho y alto en píxeles.
-                  </p>
+                  <p className="text-xs text-purple-200/60">{t.converter.scaleHelp}</p>
                 </div>
 
                 {/* 3. Orientation & Color Filter */}
                 <div className="space-y-2">
                   <label className="block text-xs font-semibold text-white">
-                    Geometría y filtro óptico
+                    {t.converter.geometryLabel}
                   </label>
                   <div className="flex items-center gap-2">
                     <button
@@ -578,7 +564,7 @@ export const ConverterPage: React.FC = () => {
                         setRotation((prev) => ((prev + 90) % 360) as 0 | 90 | 180 | 270)
                       }
                       className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-mono-tabular font-medium bg-[#17122B] border border-purple-500/30 text-purple-100 rounded-lg hover:bg-purple-500/20 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
-                      title="Rotar 90 grados"
+                      title={t.converter.rotateTitle}
                     >
                       <RotateCw className="w-3.5 h-3.5" />
                       {rotation}°
@@ -591,8 +577,8 @@ export const ConverterPage: React.FC = () => {
                           ? 'bg-purple-600 text-white border-purple-400'
                           : 'bg-[#17122B] text-purple-200 border-purple-500/30 hover:bg-purple-500/20'
                       }`}
-                      title="Voltear horizontalmente"
-                      aria-label="Voltear horizontalmente"
+                      title={t.converter.flipHTitle}
+                      aria-label={t.converter.flipHTitle}
                     >
                       <FlipHorizontal className="w-4 h-4" />
                     </button>
@@ -604,8 +590,8 @@ export const ConverterPage: React.FC = () => {
                           ? 'bg-purple-600 text-white border-purple-400'
                           : 'bg-[#17122B] text-purple-200 border-purple-500/30 hover:bg-purple-500/20'
                       }`}
-                      title="Voltear verticalmente"
-                      aria-label="Voltear verticalmente"
+                      title={t.converter.flipVTitle}
+                      aria-label={t.converter.flipVTitle}
                     >
                       <FlipVertical className="w-4 h-4" />
                     </button>
@@ -613,32 +599,30 @@ export const ConverterPage: React.FC = () => {
                     <select
                       value={colorFilter}
                       onChange={(e) => setColorFilter(e.target.value as ColorFilterMode)}
-                      aria-label="Filtro de color"
+                      aria-label={t.converter.geometryLabel}
                       className="flex-1 px-2.5 py-1.5 text-xs font-medium bg-[#17122B] border border-purple-500/30 rounded-lg text-purple-100 focus:outline-none focus:border-purple-400"
                     >
-                      <option value="none">Color original</option>
-                      <option value="grayscale">Blanco y negro</option>
-                      <option value="sepia">Sepia editorial</option>
-                      <option value="contrast">Alto contraste</option>
-                      <option value="invert">Invertir canales</option>
+                      <option value="none">{t.converter.filterOriginal}</option>
+                      <option value="grayscale">{t.converter.filterGrayscale}</option>
+                      <option value="sepia">{t.converter.filterSepia}</option>
+                      <option value="contrast">{t.converter.filterContrast}</option>
+                      <option value="invert">{t.converter.filterInvert}</option>
                     </select>
                   </div>
-                  <p className="text-xs text-purple-200/60">
-                    Transformaciones aplicadas antes de codificar el archivo final.
-                  </p>
+                  <p className="text-xs text-purple-200/60">{t.converter.geometryHelp}</p>
                 </div>
 
                 {/* 4. Alpha Matte & ICO Dimension */}
                 <div className="space-y-2">
                   <label className="block text-xs font-semibold text-white">
-                    Fondo sin alfa y tamaño ICO
+                    {t.converter.alphaIcoLabel}
                   </label>
                   <div className="flex items-center gap-2">
                     <div className="flex items-center gap-1 p-1 bg-[#17122B] border border-purple-500/25 rounded-lg">
                       {[
-                        { hex: '#0F172A', name: 'Obsidiana' },
-                        { hex: '#FFFFFF', name: 'Blanco' },
-                        { hex: '#3B0764', name: 'Violeta' }
+                        { hex: '#0F172A', name: t.converter.bgObsidian },
+                        { hex: '#FFFFFF', name: t.converter.bgWhite },
+                        { hex: '#3B0764', name: t.converter.bgViolet }
                       ].map((bg) => (
                         <button
                           key={bg.hex}
@@ -658,7 +642,7 @@ export const ConverterPage: React.FC = () => {
                     <select
                       value={icoSize}
                       onChange={(e) => setIcoSize(Number(e.target.value) as 32 | 64 | 128 | 256)}
-                      aria-label="Tamaño de exportación ICO"
+                      aria-label={t.converter.alphaIcoLabel}
                       className="px-2 py-1.5 text-xs font-mono-tabular bg-[#17122B] border border-purple-500/30 rounded-lg text-purple-100"
                     >
                       <option value={256}>ICO 256px</option>
@@ -667,9 +651,7 @@ export const ConverterPage: React.FC = () => {
                       <option value={32}>ICO 32px</option>
                     </select>
                   </div>
-                  <p className="text-xs text-purple-200/60">
-                    Relleno usado al convertir transparencias a JPG, BMP o TIFF.
-                  </p>
+                  <p className="text-xs text-purple-200/60">{t.converter.alphaIcoHelp}</p>
                 </div>
               </motion.div>
             )}
@@ -694,7 +676,7 @@ export const ConverterPage: React.FC = () => {
                   onClick={() => setLimitNotice(null)}
                   className="text-xs font-semibold text-purple-300 hover:text-white underline whitespace-nowrap shrink-0 cursor-pointer"
                 >
-                  Entendido
+                  {t.converter.dismissNotice}
                 </button>
               </motion.div>
             )}
@@ -754,16 +736,15 @@ export const ConverterPage: React.FC = () => {
                     </motion.div>
                     <div className="space-y-1">
                       <p className="text-base font-bold text-white font-display">
-                        Arrastra tus imágenes aquí o haz clic para explorar
+                        {t.converter.dropzoneEmptyTitle}
                       </p>
                       <p className="text-xs text-purple-200/65">
-                        Soporta hasta {MAX_IMAGES} imágenes simultáneas · PNG · JPG · JPEG · WEBP ·
-                        AVIF · BMP · TIFF · GIF · ICO · SVG
+                        {t.converter.dropzoneEmptySub(MAX_IMAGES)}
                       </p>
                     </div>
                     <div className="pt-2 flex items-center justify-center gap-3">
                       <span className="px-4 py-2 text-xs font-semibold text-white rounded-lg neon-button-purple transition-all whitespace-nowrap">
-                        Seleccionar archivos (máx. {MAX_IMAGES})
+                        {t.converter.dropzoneEmptyBtn(MAX_IMAGES)}
                       </span>
                     </div>
                   </div>
@@ -772,15 +753,11 @@ export const ConverterPage: React.FC = () => {
                     <div className="flex items-center gap-3 text-left">
                       <Upload className="w-4 h-4 text-purple-300 shrink-0" />
                       <span className="text-xs font-medium text-purple-100">
-                        Añadir más imágenes al lote actual ({MAX_IMAGES - queue.length}{' '}
-                        {MAX_IMAGES - queue.length === 1
-                          ? 'ranura disponible'
-                          : 'ranuras disponibles'}
-                        )
+                        {t.converter.dropzoneAddMore(MAX_IMAGES - queue.length)}
                       </span>
                     </div>
                     <span className="text-xs font-semibold text-purple-300 hover:text-white hover:underline whitespace-nowrap shrink-0">
-                      + Subir archivo
+                      {t.converter.dropzoneUploadLink}
                     </span>
                   </div>
                 )}
@@ -851,14 +828,14 @@ export const ConverterPage: React.FC = () => {
                           <div className="flex flex-wrap items-center gap-4 lg:gap-6">
                             <div className="flex items-center gap-2">
                               <span className="text-xs text-purple-200/70 whitespace-nowrap">
-                                Convertir a:
+                                {t.converter.convertToLabel}
                               </span>
                               <select
                                 value={item.targetFormat}
                                 onChange={(e) =>
                                   handleItemFormatChange(item.id, e.target.value as ImageFormatId)
                                 }
-                                aria-label={`Formato de salida para ${item.file.name}`}
+                                aria-label={`${t.converter.convertToLabel} ${item.file.name}`}
                                 className="px-3 py-1.5 text-xs font-mono-tabular font-semibold bg-[#151026] hover:bg-[#1E1736] border border-purple-500/35 rounded-lg text-white focus:outline-none focus:border-purple-400 cursor-pointer"
                               >
                                 {SUPPORTED_FORMATS.map((f) => (
@@ -873,18 +850,18 @@ export const ConverterPage: React.FC = () => {
                             <div className="min-w-[190px] text-left lg:text-right font-mono-tabular text-xs">
                               {item.status === 'idle' && (
                                 <span className="text-purple-200/60">
-                                  Listo para exportar a {targetSpec.label}
+                                  {t.converter.readyToExport(targetSpec.label)}
                                 </span>
                               )}
                               {item.status === 'converting' && (
                                 <span className="text-purple-300 font-medium inline-flex items-center gap-1.5">
                                   <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                                  Codificando {targetSpec.label}...
+                                  {t.converter.encodingStatus(targetSpec.label)}
                                 </span>
                               )}
                               {item.status === 'error' && (
                                 <span className="text-rose-400 font-medium">
-                                  {item.errorMessage || 'Error de formato'}
+                                  {item.errorMessage || t.converter.errorStatus}
                                 </span>
                               )}
                               {item.status === 'done' && item.result && (
@@ -923,10 +900,10 @@ export const ConverterPage: React.FC = () => {
                                     type="button"
                                     onClick={() => setCompareItem(item)}
                                     className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-purple-100 bg-[#151026] border border-purple-500/35 rounded-lg hover:bg-purple-500/20 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
-                                    title="Comparar original y resultado"
+                                    title={t.converter.compareTitle}
                                   >
                                     <Eye className="w-3.5 h-3.5 text-purple-300" />
-                                    Comparar
+                                    {t.converter.compareBtn}
                                   </motion.button>
                                   <motion.button
                                     whileHover={{ scale: 1.03 }}
@@ -936,7 +913,7 @@ export const ConverterPage: React.FC = () => {
                                     className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white rounded-lg neon-button-purple transition-all whitespace-nowrap shrink-0 cursor-pointer"
                                   >
                                     <Download className="w-3.5 h-3.5" />
-                                    Descargar
+                                    {t.converter.downloadBtn}
                                   </motion.button>
                                 </>
                               ) : (
@@ -948,7 +925,7 @@ export const ConverterPage: React.FC = () => {
                                   disabled={item.status === 'converting'}
                                   className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-purple-100 bg-[#18122B] border border-purple-500/40 rounded-lg hover:bg-purple-600 hover:text-white disabled:opacity-50 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
                                 >
-                                  Convertir
+                                  {t.converter.convertSingleBtn}
                                 </motion.button>
                               )}
 
@@ -956,8 +933,8 @@ export const ConverterPage: React.FC = () => {
                                 type="button"
                                 onClick={() => handleRemoveItem(item.id)}
                                 className="p-1.5 text-purple-300/50 hover:text-rose-400 hover:bg-rose-500/15 rounded-lg transition-colors cursor-pointer"
-                                aria-label={`Eliminar ${item.file.name}`}
-                                title="Eliminar de la cola"
+                                aria-label={`${t.converter.removeTitle} ${item.file.name}`}
+                                title={t.converter.removeTitle}
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>
@@ -977,13 +954,13 @@ export const ConverterPage: React.FC = () => {
                       onClick={handleClearQueue}
                       className="text-xs font-medium text-purple-300/70 hover:text-white transition-colors whitespace-nowrap shrink-0 cursor-pointer"
                     >
-                      Vaciar las {queue.length} imágenes
+                      {t.converter.clearQueueBtn(queue.length)}
                     </button>
 
                     {completedItems.length > 0 && (
                       <div className="text-xs text-purple-200/80 font-mono-tabular">
                         <span>
-                          Salida total: {formatBytes(totalConvertedBytes)} (
+                          {t.converter.totalOutput}: {formatBytes(totalConvertedBytes)} (
                           {totalSavingsPercent > 0
                             ? `+${totalSavingsPercent}%`
                             : `${totalSavingsPercent}%`}
@@ -1003,7 +980,7 @@ export const ConverterPage: React.FC = () => {
                         className="flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-purple-100 bg-[#151026] border border-purple-500/45 rounded-lg hover:bg-purple-500/25 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
                       >
                         <Archive className="w-4 h-4 text-purple-300" />
-                        Descargar lote en ZIP ({completedItems.length})
+                        {t.converter.downloadZipBtn(completedItems.length)}
                       </motion.button>
                     )}
 
@@ -1019,10 +996,8 @@ export const ConverterPage: React.FC = () => {
                         className={`w-4 h-4 ${isBatchConverting ? 'animate-spin' : ''}`}
                       />
                       {isBatchConverting
-                        ? 'Procesando lote...'
-                        : `Convertir ${
-                            queue.length === 1 ? 'imagen' : `las ${queue.length} imágenes`
-                          }`}
+                        ? t.converter.processingBatch
+                        : t.converter.convertBatchBtn(queue.length)}
                     </motion.button>
                   </div>
                 </div>
